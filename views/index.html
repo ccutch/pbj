@@ -1,0 +1,7 @@
+
+{{ block "main" . }}
+<form hx-post="/hello" hx-swap="outerHTML">
+    <input type="text" name="name" placeholder="Enter your name" required />
+    <button type="submit">Submit</button>
+</form>
+{{ end }}
