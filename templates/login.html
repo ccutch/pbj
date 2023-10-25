@@ -1,0 +1,41 @@
+{{ block "head" . }}
+<script type="module">
+import PocketBase from '/scripts/pocketbase.es.js'
+
+const pb = new PocketBase('https://8090-ccutch-pbjstack-tcrrn613x9y.ws-us105.gitpod.io');
+
+window.authenticate = async (event) => {
+    event.preventDefault();
+    try {
+        await signup(event);
+    } catch(err) { }
+    await login(event);
+    window.location.reload();
+};
+
+const signup = async (event) => {
+    await pb.collection("users").create({
+        email: event.target.email.value,
+        password: event.target.password.value,
+        passwordConfirm: event.target.password.value,
+    });
+};
+
+const login = async (event) => {
+    await pb.collection('users').authWithPassword(
+        event.target.email.value,
+        event.target.password.value,
+    );
+};
+
+</script>
+{{ end }}
+
+
+{{ block "main" . }}
+<form hx-on:submit="login(event)">
+    <input name="email" placeholder="email" type="email" required>
+    <input name="password" placeholder="Password" type="password" required>
+    <button>Login</button>
+</form>
+{{ end }}
