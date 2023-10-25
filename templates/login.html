@@ -33,7 +33,7 @@ const login = async (event) => {
 
 
 {{ block "main" . }}
-<form hx-on:submit="login(event)">
+<form hx-on:submit="authenticate(event)">
     <input name="email" placeholder="email" type="email" required>
     <input name="password" placeholder="Password" type="password" required>
     <button>Login</button>
