@@ -1,6 +1,9 @@
 ## Pb&J Stack
 
-The PB Stacks for _P_ocket_B_ase, and the J stands for _j_ust HTMX.
+The **PB** Stacks for **P**ocket**B**ase, and the **J** stands for **j**ust HTMX.
+
+
+![pbj-time](https://github.com/ccutch/pb-j-stack/assets/4782109/88da34d6-410c-4a7b-b7c7-0cc65ae79cb9)
 
 
 ## Simplicity > Dependencies
@@ -20,8 +23,9 @@ go run main.go serve
 
 ```
 
-
 And you're ready to go...
+
+[screen-capture - 2023-10-19T012556.063.webm](https://github.com/ccutch/pb-j-stack/assets/4782109/05880133-0a41-4062-bf59-b84fcfec2645)
 
 
 
