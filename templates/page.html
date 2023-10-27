@@ -2,24 +2,31 @@
 <html lang="en">
 <head>
   <title>{{block "title" .}}It's Pb&J Time{{end}}</title>
+  <meta name="viewport" content="width=device-width">
+  <meta charSet="utf-8">
+  <link rel="stylesheet" href="/assets/uno.css">
   <script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
   <script type="module">
     import PocketBase from '/scripts/pocketbase.es.js';
     const pb = new PocketBase(window.location.href);
+    window.logout = () => {
+      pb.authStore.clear()
+      window.location.reload()
+    };
     document.body.addEventListener("htmx:configRequest", (event) => {
       event.detail.headers['Authorization'] = `Bearer ${pb.authStore.token}`;
     });
   </script>
+  <style>*{box-sizing:border-box}</style>
 </head>
-<body class="m-0 font-sans">
-  {{ if .Page }}
+<body class="m-0 font-sans bg-slate-800">
+  {{- if .Page }}
   <main
-    class="container mx-auto"
     hx-get="/{{.Page}}?{{.Params}}"
     hx-trigger="load"
     hx-swap="innerHTML"
   ></main>
-  {{ end }}
+  {{- end }}
 </body>
 </html>

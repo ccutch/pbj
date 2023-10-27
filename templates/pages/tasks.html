@@ -1,9 +1,26 @@
+<div class="flex flex-col gap-8 container mx-auto p-8">
 
+  {{ with .Board }}
+  <div class="flex items-center justify-between">
+    <div class="flex flex-col gap-4 leading-0">
+      <a href="/" class="text-blue-200/80 hover:text-blue-600">
+        &larr; Boards
+      </a>
+      <h1 class="text-gray-200">{{.Name}}</h1>
+    </div>
 
-{{ with .Board }}
-  <h1>{{.Name}}</h1>
-{{ end }}
+    <div
+      class="text-gray-200 font-semibold py-1 px-4 rounded-xl bg-gray-400/10 cursor-pointer hover:bg-gray-400/20"
+      hx-on:click="logout()"
+    >
+      Log Out
+    </div>
+  </div>
+  {{ end }}
 
-{{ range .Tasks }}
-  {{ template "task" . }}
-{{ end }}
+  <div class="flex flex-col gap-2">
+    {{ range .Tasks }}
+    {{ template "task" . }}
+    {{ end }}
+  </div>
+</div>
