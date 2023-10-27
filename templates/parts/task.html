@@ -1,0 +1,16 @@
+
+{{ block "task" . }}
+<div class="flex flex-col task">
+  <div class="flex items-center gap-4">
+    <input
+      type="checkbox"
+      {{if .Completed}}checked{{end}}
+      hx-put="/tasks/complete?id={{.Id}}"
+      hx-swap="outerHTML"
+      hx-target="closest .task"
+    >
+    <h3 class="leading-0">{{.Title}}</h3>
+  </div>
+  <span>{{.Description}}</span>
+</div>
+{{ end }}

@@ -1,13 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{{block "title" .}}It's Pb&J Time{{end}}</title>
-    <script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
-
-    {{ block "head" . }}{{ end }}
+  <title>{{block "title" .}}It's Pb&J Time{{end}}</title>
+  <script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
+  <script type="module">
+    import PocketBase from '/scripts/pocketbase.es.js';
+    const pb = new PocketBase(window.location.href);
+    document.body.addEventListener("htmx:configRequest", (event) => {
+      event.detail.headers['Authorization'] = `Bearer ${pb.authStore.token}`;
+    });
+  </script>
 </head>
-<body>
-    {{ block "main" . }} testing {{ end }}
+<body class="m-0 font-sans">
+  {{ if .Page }}
+  <main
+    class="container mx-auto"
+    hx-get="/{{.Page}}?{{.Params}}"
+    hx-trigger="load"
+    hx-swap="innerHTML"
+  ></main>
+  {{ end }}
 </body>
 </html>

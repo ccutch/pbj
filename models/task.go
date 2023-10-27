@@ -1,4 +1,4 @@
-package database
+package models
 
 import "github.com/pocketbase/pocketbase/models"
 
@@ -8,6 +8,7 @@ type Task struct {
 	models.BaseModel
 	Title       string `db:"title" json:"title"`
 	Description string `db:"description" json:"description"`
+	Board       string `db:"board" json:"board"`
 	Owner       string `db:"owner" json:"owner"`
 	Completed   bool   `db:"completed" json:"completed"`
 }

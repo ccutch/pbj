@@ -1,0 +1,9 @@
+
+
+{{ with .Board }}
+  <h1>{{.Name}}</h1>
+{{ end }}
+
+{{ range .Tasks }}
+  {{ template "task" . }}
+{{ end }}

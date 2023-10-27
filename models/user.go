@@ -1,6 +1,10 @@
-package database
+package models
 
 import "github.com/pocketbase/pocketbase/models"
+
+type (
+	Admin = models.Admin
+)
 
 var _ models.Model = (*User)(nil)
 
@@ -13,14 +17,4 @@ type User struct {
 
 func (u *User) TableName() string {
 	return "users"
-}
-
-func FromAuth(auth *models.Record) *User {
-	if auth == nil {
-		return nil
-	}
-	return &User{
-		Id:   auth.GetString("id"),
-		Name: auth.GetString("name"),
-	}
 }

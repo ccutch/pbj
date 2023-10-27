@@ -1,0 +1,9 @@
+
+
+
+<h1>Available Boards</h1>
+<ul>
+  {{ range . }}
+  <li> <a href="/tasks?board={{.Id}}">Board: {{.Name}}</a>
+  {{ end }}
+</ul>
