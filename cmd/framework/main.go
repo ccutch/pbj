@@ -2,7 +2,8 @@ package main
 
 import (
 	"log"
-	. "pb-stack"
+
+	. "github.com/ccutch/pb-j-stack"
 
 	"github.com/labstack/echo/v5"
 )
