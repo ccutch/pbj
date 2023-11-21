@@ -74,7 +74,7 @@ func WithScript(src string) func(*App) {
 func WithInlineScript(content string) func(*App) {
 	return func(app *App) {
 		app.headerContent = fmt.Sprintf(
-			`%s\n<script>%s</script>`,
+			`%s<script>%s</script>`,
 			app.headerContent, content,
 		)
 	}
