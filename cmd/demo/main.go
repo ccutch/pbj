@@ -2,38 +2,45 @@ package main
 
 import (
 	"log"
-	"os"
-	"pb-stack/handlers"
-	"pb-stack/routes"
-	"strings"
 
-	"github.com/pocketbase/pocketbase"
-	"github.com/pocketbase/pocketbase/plugins/migratecmd"
+	. "github.com/ccutch/pb-j-stack"
 
-	_ "pb-stack/migrations"
+	"github.com/labstack/echo/v5"
 )
 
 func main() {
-	// New App
-	app := pocketbase.New()
 
-	// REST Handlers
-	app.OnRecordsListRequest("tasks").Add(handlers.ListTasks)
+	app := NewApp(
+		WithStylesheet("https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css"),
+		WithScript("https://cdn.tailwindcss.com"),
+	)
 
-	// Custom Routes
-	app.OnBeforeServe().Add(routes.PageRoutes)
-	app.OnBeforeServe().Add(routes.TaskRoutes)
-
-	// Migrations
-	isGoRun := strings.HasPrefix(os.Args[0], os.TempDir())
-	log.Println("is go run", isGoRun)
-
-	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
-		// enable auto creation of migration files when making collection changes in the Admin UI
-		// (the isGoRun check is to enable it only during development)
-		Automigrate: isGoRun,
+	// Pages (HTTP GET)
+	app.Static(HomePage(WithTemplate("home")))
+	app.Static(NewPage("about"))
+	app.Static(NewPage("path-to-profit"))
+	app.Serve(NewPage("hello/:name"), func(c echo.Context) (any, error) {
+		// Construct a struct to say hello
+		return struct{ Name string }{
+			Name: c.PathParam("name"),
+		}, nil
 	})
 
-	// It's PB&J Time
-	log.Fatal(app.Start())
+	// Callbacks (HTTP POST)
+	app.On("hello-again", func(c *HandlerContext) error {
+		return c.Refresh()
+	})
+
+	app.On("hello-another", func(c *HandlerContext) error {
+		return c.Redirect("hello/" + c.FormValue("name"))
+	})
+
+	// Events (SQLITE CRUD)
+	// app.Events(func(events *Events) {
+	// TODO
+	// })
+
+	if err := app.Start(); err != nil {
+		log.Fatal(err)
+	}
 }

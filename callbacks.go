@@ -10,24 +10,14 @@ import (
 	"github.com/pocketbase/pocketbase/tools/template"
 )
 
-// Callbacks mounts callback handler methods as HTTP POST routes
-func (app *App) Callbacks(fn func(*Handlers)) {
+// On function to mount callbacks to PocketBase
+func (app *App) On(route string, handler func(*HandlerContext) error) {
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		fn(&Handlers{e})
+		e.Router.POST("/"+route, func(c echo.Context) error {
+			return handler(&HandlerContext{c})
+		}, apis.ActivityLogger(app))
 		return nil
 	})
-}
-
-// Handlers aree
-type Handlers struct {
-	*core.ServeEvent
-}
-
-// On function to mount callbacks to PocketBase
-func (handlers *Handlers) On(route string, handler func(*HandlerContext) error) {
-	handlers.Router.POST("/"+route, func(c echo.Context) error {
-		return handler(&HandlerContext{c})
-	}, apis.ActivityLogger(handlers.App))
 }
 
 // HandlerContext encapsolates echo context with additional behavior

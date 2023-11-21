@@ -12,32 +12,20 @@ import (
 	"github.com/pocketbase/pocketbase/tools/template"
 )
 
-// Pages method used to mount pages to Pocketbase's Events API
-func (app *App) Pages(fn func(*Pages)) {
-	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		fn(&Pages{e, app})
-		return nil
-	})
-}
-
-// Pages are HTTP GET routes that serve pages from templates/pages
-type Pages struct {
-	*core.ServeEvent
-	app *App
-}
-
 // Static function for mounting static pages (SSG optimally)
-func (pages *Pages) Static(p *Page) {
-	p.pages = pages
-	pages.Serve(p, func(echo.Context) (any, error) { return nil, nil })
+func (app *App) Static(p *Page) {
+	app.Serve(p, func(echo.Context) (any, error) { return nil, nil })
 }
 
 // Serve function for mounting dynamit pages (SSR optimally)
-func (pages *Pages) Serve(p *Page, h GetProps) {
-	p.pages = pages
-	pages.Router.GET("/"+p.route, func(c echo.Context) error {
-		return p.Render(c, h)
-	}, apis.ActivityLogger(pages.app))
+func (app *App) Serve(p *Page, h GetProps) {
+	p.app = app
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		e.Router.GET("/"+p.route, func(c echo.Context) error {
+			return p.Render(c, h)
+		}, apis.ActivityLogger(app))
+		return nil
+	})
 }
 
 // GetProps type for getting the props of a page when needed
@@ -45,7 +33,7 @@ type GetProps func(echo.Context) (any, error)
 
 // Page data structure for passing configuration state to pages
 type Page struct {
-	pages         *Pages
+	app           *App
 	admin, public bool
 	route, tmpl   string
 }
@@ -144,7 +132,7 @@ func (p *Page) Render(c echo.Context, h GetProps) (err error) {
 		Page          string
 		Params        string
 		HeaderContent string
-	}{c.Request().URL.Path, c.Request().URL.RawQuery, p.pages.app.headerContent})
+	}{c.Request().URL.Path, c.Request().URL.RawQuery, p.app.headerContent})
 	if err != nil {
 		return errors.Wrap(err, "failed to render")
 	}
