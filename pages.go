@@ -177,7 +177,7 @@ var hydrationTemplate = `
   </head>
   <body>
     <main
-	  hx-get="/{{.Page}}?{{.Params}}"
+	  hx-get="{{.Page}}?{{.Params}}"
       hx-trigger="load"
       hx-swap="outerHTML"
     ></main>
