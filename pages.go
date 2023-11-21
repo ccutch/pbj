@@ -144,7 +144,7 @@ func (p *Page) Render(c echo.Context, h GetProps) (err error) {
 		Page          string
 		Params        string
 		HeaderContent string
-	}{p.route, c.Request().URL.RawQuery, p.pages.app.HeaderContent})
+	}{p.route, c.Request().URL.RawQuery, p.pages.app.headerContent})
 	if err != nil {
 		return errors.Wrap(err, "failed to render")
 	}

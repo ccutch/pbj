@@ -10,31 +10,28 @@ import (
 
 func main() {
 
-	app := NewApp(`
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css"
-		rel="stylesheet" type="text/css" />
+	app := NewApp(
+		WithStylesheet("https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css"),
+		WithScript("https://cdn.tailwindcss.com"),
+		WithInlineScript(`
+tailwind.config = {
+  daisyui: {
+	themes: [
+	  "synthwave",
+	  "aqua",
+	  "luxury",
+	  "dracula",
+	  "emerald",
+	  "lofi",
+	  "dim",
+	],
+  },
+};
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      daisyui: {
-        themes: [
-          "synthwave",
-          "aqua",
-          "luxury",
-          "dracula",
-          "emerald",
-          "lofi",
-          "dim",
-        ],
-      },
-    };
-
-    (() => {
-      const theme = localStorage.getItem('theme') ?? 'synthwave';
-      if (theme) document.documentElement.setAttribute('data-theme', theme);
-    })();
-  </script>`)
+(() => {
+  const theme = localStorage.getItem('theme') ?? 'synthwave';
+  if (theme) document.documentElement.setAttribute('data-theme', theme);
+})();`))
 
 	// Pages (HTTP GET)
 	app.Pages(func(pages *Pages) {
