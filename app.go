@@ -47,7 +47,7 @@ func (app *App) Start() error {
 func WithMeta(name, content string) func(*App) {
 	return func(app *App) {
 		app.headerContent = fmt.Sprintf(
-			`%s\n<meta name="%s" content="%s">`,
+			`%s<meta name="%s" content="%s">`,
 			app.headerContent, name, content,
 		)
 	}
@@ -56,7 +56,7 @@ func WithMeta(name, content string) func(*App) {
 func WithStylesheet(href string) func(*App) {
 	return func(app *App) {
 		app.headerContent = fmt.Sprintf(
-			`%s\n<link rel="stylesheet" href="%s" />`,
+			`%s<link rel="stylesheet" href="%s" />`,
 			app.headerContent, href,
 		)
 	}
@@ -65,7 +65,7 @@ func WithStylesheet(href string) func(*App) {
 func WithScript(src string) func(*App) {
 	return func(app *App) {
 		app.headerContent = fmt.Sprintf(
-			`%s\n<script src="%s"></script>`,
+			`%s<script src="%s"></script>`,
 			app.headerContent, src,
 		)
 	}

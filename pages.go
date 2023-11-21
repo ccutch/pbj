@@ -152,34 +152,35 @@ func (p *Page) Render(c echo.Context, h GetProps) (err error) {
 	return c.HTML(http.StatusOK, html)
 }
 
+// Everything we need for hydration including some sensible defaults
 var hydrationTemplate = `
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <title>{{block "title" .}}Outboxed{{end}}</title>
-  <meta name="viewport" content="width=user-scalable=no, device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
-  <meta charSet="utf-8">
-  {{.HeaderContent|raw}}
-  <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-  <script type="module">
-    import PocketBase from '/scripts/pocketbase.es.js';
-    const pb = new PocketBase(window.location.href);
-    window.logout = () => {
-      pb.authStore.clear();
-      window.location.reload();
-    };
-    document.body.addEventListener("htmx:configRequest", (event) => {
-      event.detail.headers['Authorization'] = "Bearer "+pb.authStore.token;
-    });
-  </script>
-  <style>*{box-sizing:border-box}</style>
-</head>
-<body>
-  <main
-    hx-get="/{{.Page}}?{{.Params}}"
-    hx-trigger="load"
-    hx-swap="outerHTML"
-  ></main>
-</body>
+  <head>
+    <title>{{block "title" .}}{{end}}</title>
+    <meta name="viewport" content="width=user-scalable=no, device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
+    <meta charSet="utf-8">
+    {{.HeaderContent|raw}}
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script type="module">
+      import PocketBase from '/scripts/pocketbase.es.js';
+      const pb = new PocketBase(window.location.href);
+      window.logout = () => {
+        pb.authStore.clear();
+        window.location.reload();
+      };
+      document.body.addEventListener("htmx:configRequest", (event) => {
+        event.detail.headers['Authorization'] = "Bearer "+pb.authStore.token;
+      });
+    </script>
+    <style>*{box-sizing:border-box}</style>
+  </head>
+  <body>
+    <main
+	  hx-get="/{{.Page}}?{{.Params}}"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+    ></main>
+  </body>
 </html>
 `
