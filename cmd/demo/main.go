@@ -1,3 +1,4 @@
+o
 package main
 
 import (
@@ -36,9 +37,11 @@ func main() {
 	})
 
 	// Events (SQLITE CRUD)
-	// app.Events(func(events *Events) {
-	// TODO: REST triggered events
-	// })
+	app.Events(func(events *Events) {
+	 // REST triggered events - update this block with actual code.
+         
+	 /* // insert_code_here */
+	})
 
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
