@@ -1,31 +1,23 @@
-## Pb&J Stack
+{
+  "id": "chatcmpl-8NdlFb7xcfzga39oUz6Cl3A6cLyoy",
+  "object": "chat.completion",
+  "created": 1700645077,
+  "model": "gpt-4-0613",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Sure, I would like to help you, but you haven't provided the current content of the file you're working on and the todo found on line #18. Could you please provide these details so I can assist you better?"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 71,
+    "completion_tokens": 46,
+    "total_tokens": 117
+  }
+}
 
-The **PB** Stacks for **P**ocket**B**ase, and the **J** stands for **j**ust HTMX.
-
-
-![pbj-time](https://github.com/ccutch/pb-j-stack/assets/4782109/88da34d6-410c-4a7b-b7c7-0cc65ae79cb9)
-
-
-## Simplicity > Dependencies
-
-I wanted to make the simplest stack I could using the least number of dependencies, and writing the simplest code. This is a very hard balance to find as simplicity hides complexity.
-
-Independently, I found both PocketBase and HTMX. Both solutions focus on what can be done simply and effectively. Once I looked at the documentation for PocketBase and saw that with Go I can render templates the path forward was clear.
-
-
-## Get Started
-
-You should fork this repository for your next new project. Then run:
-
-```
-go mod tidy
-go run main.go serve
-
-```
-
-And you're ready to go...
-
-[screen-capture - 2023-10-19T012556.063.webm](https://github.com/ccutch/pb-j-stack/assets/4782109/05880133-0a41-4062-bf59-b84fcfec2645)
-
-
-
+Hello World
