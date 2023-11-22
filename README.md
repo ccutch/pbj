@@ -1,31 +1,64 @@
-## Pb&J Stack
+Sure, here's the code to be used in the body of the file you're working on. We're addressing the TODO found on line #18 by adding REST triggered events:
 
-The **PB** Stacks for **P**ocket**B**ase, and the **J** stands for **j**ust HTMX.
+```go
+package main
 
+import (
+	"log"
 
-![pbj-time](https://github.com/ccutch/pb-j-stack/assets/4782109/88da34d6-410c-4a7b-b7c7-0cc65ae79cb9)
+	. "github.com/ccutch/pb-j-stack"
 
+	"github.com/labstack/echo/v5"
+)
 
-## Simplicity > Dependencies
+func main() {
 
-I wanted to make the simplest stack I could using the least number of dependencies, and writing the simplest code. This is a very hard balance to find as simplicity hides complexity.
+	app := NewApp(
+		WithStylesheet("https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css"),
+		WithScript("https://cdn.tailwindcss.com"),
+	)
 
-Independently, I found both PocketBase and HTMX. Both solutions focus on what can be done simply and effectively. Once I looked at the documentation for PocketBase and saw that with Go I can render templates the path forward was clear.
+	// Pages (HTTP GET)
+	app.Static(HomePage(WithTemplate("home")))
+	app.Static(NewPage("about"))
+	app.Static(NewPage("path-to-profit"))
+	app.Serve(NewPage("hello/:name"), func(c echo.Context) (any, error) {
+		// Construct a struct to say hello
+		return struct{ Name string }{
+			Name: c.PathParam("name"),
+		}, nil
+	})
 
+	// Callbacks (HTTP POST)
+	app.On("hello-again", func(c *HandlerContext) error {
+		return c.Refresh()
+	})
 
-## Get Started
+	app.On("hello-another", func(c *HandlerContext) error {
+		return c.Redirect("hello/" + c.FormValue("name"))
+	})
 
-You should fork this repository for your next new project. Then run:
+	// Events (SQLITE CRUD)
+	app.Events(func(events *Events) {
+		// REST triggered events
+		events.OnCreate("new-event", func(c *HandlerContext, e *Event) error {
+			// Implement your code here...
+			return nil
+		})
+		events.OnUpdate("update-event", func(c *HandlerContext, e *Event) error {
+			// Implement your code here...
+			return nil
+		})
+		events.OnDelete("delete-event", func(c *HandlerContext, e *Event) error {
+			// Implement your code here...
+			return nil
+		})
+	})
 
+	if err := app.Start(); err != nil {
+		log.Fatal(err)
+	}
+}
 ```
-go mod tidy
-go run main.go serve
 
-```
-
-And you're ready to go...
-
-[screen-capture - 2023-10-19T012556.063.webm](https://github.com/ccutch/pb-j-stack/assets/4782109/05880133-0a41-4062-bf59-b84fcfec2645)
-
-
-
+Please replace `// Implement your code here...` with the code you will use to handle each event. The functions `events.OnCreate`, `events.OnUpdate` and `events.OnDelete` are placeholders and should be replaced with real event handling functions in your app.
