@@ -1,31 +1,22 @@
-## Pb&J Stack
+Sure, the task seems to be related to implementing SQLite CRUD events. Let's add three hypothetical events pertaining to entity management, such as creation, update, and deletion. These are common operations in any application. Replace lines 27-30 in your code with the following:
 
-The **PB** Stacks for **P**ocket**B**ase, and the **J** stands for **j**ust HTMX.
+```go
+app.Events(func(events *Events) {
+	events.On("create-entity", func(e *EventContext) error {
+		// insertion code for entity in SQLite database
+		return nil
+	})
 
+	events.On("update-entity", func(e *EventContext) error {
+		// update code for entity in SQLite database
+		return nil
+	})
 
-![pbj-time](https://github.com/ccutch/pb-j-stack/assets/4782109/88da34d6-410c-4a7b-b7c7-0cc65ae79cb9)
-
-
-## Simplicity > Dependencies
-
-I wanted to make the simplest stack I could using the least number of dependencies, and writing the simplest code. This is a very hard balance to find as simplicity hides complexity.
-
-Independently, I found both PocketBase and HTMX. Both solutions focus on what can be done simply and effectively. Once I looked at the documentation for PocketBase and saw that with Go I can render templates the path forward was clear.
-
-
-## Get Started
-
-You should fork this repository for your next new project. Then run:
-
+	events.On("delete-entity", func(e *EventContext) error {
+		// deletion code for entity in SQLite database
+		return nil
+	})
+})
 ```
-go mod tidy
-go run main.go serve
-
-```
-
-And you're ready to go...
-
-[screen-capture - 2023-10-19T012556.063.webm](https://github.com/ccutch/pb-j-stack/assets/4782109/05880133-0a41-4062-bf59-b84fcfec2645)
-
-
-
+The body of each function would contain the code that performs the CRUD operation in the SQLite database. As the actual implementation depends strongly on the setup of your database, I've kept it as a comment. You will have to replace with respective SQL code according to your schema and requirement.
+Hello World
