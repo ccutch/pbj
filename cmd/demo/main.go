@@ -39,18 +39,18 @@ func main() {
 	// Events (SQLITE CRUD)
 	app.Events(func(events *Events) {
 		// Added REST triggered events
-		events.On("create", func(c *HandlerContext) error { 
-			return c.Create() 
+		events.On("create", func(c *HandlerContext) error {
+			return c.Create()
 		})
-		events.On("read", func(c *HandlerContext) error { 
-			return c.Read() 
+		events.On("read", func(c *HandlerContext) error {
+			return c.Read()
 		})
-		events.On("update", func(c *HandlerContext) error { 
-			return c.Update() 
+		events.On("update", func(c *HandlerContext) error {
+			return c.Update()
 		})
-		events.On("delete", func(c *HandlerContext) error { 
-			return c.Delete() 
-		})		
+		events.On("delete", func(c *HandlerContext) error {
+			return c.Delete()
+		})
 	})
 
 	if err := app.Start(); err != nil {
