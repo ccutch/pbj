@@ -1,3 +1,4 @@
+o
 package main
 
 import (
@@ -36,9 +37,25 @@ func main() {
 	})
 
 	// Events (SQLITE CRUD)
-	// app.Events(func(events *Events) {
-	// TODO: REST triggered events
-	// })
+	app.Events(func(events *Events) {
+		// REST triggered events
+		events.OnCreate("createEvent", func(c *HandlerContext) error {
+			// Add your code here for Create operation
+			return nil
+		})
+		events.OnRead("readEvent", func(c *HandlerContext) error {
+			// Add your code here for Read operation
+			return nil
+		})
+		events.OnUpdate("updateEvent", func(c *HandlerContext) error {
+			// Add your code here for Update operation
+			return nil
+		})
+		events.OnDelete("deleteEvent", func(c *HandlerContext) error {
+			// Add your code here for Delete operation
+			return nil
+		})
+	})
 
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
