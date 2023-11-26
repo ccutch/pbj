@@ -95,8 +95,7 @@ func (p *Page) Render(c echo.Context, h GetProps) (err error) {
 	admin, _ := c.Get(apis.ContextAdminKey).(*models.Admin)
 	if (!p.admin && user != nil) || (p.admin && admin != nil) || (p.public && isHtmx) {
 		parts, _ := filepath.Glob("templates/partials/*.html")
-		parts = append([]string{"templates/pages/" + p.tmpl + ".html"}, parts...)
-		page := reg.LoadFiles(parts...)
+		page := reg.LoadFiles("templates/pages/" + p.tmpl + ".html", parts...)
 		var data any
 		if h != nil {
 			data, err = h(c)
@@ -113,11 +112,12 @@ func (p *Page) Render(c echo.Context, h GetProps) (err error) {
 
 	// If htmx request w/o auth render login page w/o data
 	if isHtmx {
+		parts, _ := filepath.Glob("templates/partials/*.html")
 		var page *template.Renderer
 		if p.admin {
-			page = reg.LoadFiles("templates/pages/admin-login.html")
+			page = reg.LoadFiles("templates/pages/admin-login.html", parts...)
 		} else {
-			page = reg.LoadFiles("templates/pages/login.html")
+			page = reg.LoadFiles("templates/pages/login.html", parts...)
 		}
 		html, err := page.Render(nil)
 		if err != nil {
