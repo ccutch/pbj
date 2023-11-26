@@ -3,6 +3,7 @@ package pbj
 import (
 	"log"
 	"net/http"
+	"path/filepath"
 
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase/apis"
@@ -26,7 +27,9 @@ type HandlerContext struct{ echo.Context }
 // Render a partial file from templates/partials from callback
 func (c *HandlerContext) Render(name string, data any) error {
 	reg := template.NewRegistry()
-	page := reg.LoadFiles("templates/partials/" + name + ".html")
+	parts, _ := filepath.Glob("templates/partials/*.html")
+	parts = append([]string{"templates/partials/" + name + ".html"}, parts...)
+	page := reg.LoadFiles(parts...)
 	html, err := page.Render(data)
 	if err != nil {
 		log.Println("Error rendering partial", err)
