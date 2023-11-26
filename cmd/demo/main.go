@@ -37,7 +37,7 @@ func main() {
 
 	// Events (SQLITE CRUD)
 	// app.Events(func(events *Events) {
-	// TODO
+	// TODO: REST triggered events
 	// })
 
 	if err := app.Start(); err != nil {
