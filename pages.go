@@ -14,7 +14,14 @@ import (
 
 // Static function for mounting static pages (SSG optimally)
 func (app *App) Static(p *Page) {
-	app.Serve(p, func(echo.Context) (any, error) { return nil, nil })
+	app.Serve(p, func(c echo.Context) (any, error) {
+		var data struct {
+			User *models.Record
+		}
+
+		data.User, _ = c.Get(apis.ContextAuthRecordKey).(*models.Record)
+		return &data, nil
+	})
 }
 
 // Serve function for mounting dynamit pages (SSR optimally)
