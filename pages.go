@@ -15,12 +15,9 @@ import (
 // Static function for mounting static pages (SSG optimally)
 func (app *App) Static(p *Page) {
 	app.Serve(p, func(c echo.Context) (any, error) {
-		var data struct {
-			User *models.Record
-		}
-
-		data.User, _ = c.Get(apis.ContextAuthRecordKey).(*models.Record)
-		return &data, nil
+		data := map[string]*models.Record{ }
+		data["User"], _ = c.Get(apis.ContextAuthRecordKey).(*models.Record)
+		return data, nil
 	})
 }
 
