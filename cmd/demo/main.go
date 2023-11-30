@@ -1,46 +1,30 @@
-package main
+o
+app.Events(func(events *Events) {
 
-import (
-	"log"
-
-	. "github.com/ccutch/pb-j-stack"
-
-	"github.com/labstack/echo/v5"
-)
-
-func main() {
-
-	app := NewApp(
-		WithStylesheet("https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css"),
-		WithScript("https://cdn.tailwindcss.com"),
-	)
-
-	// Pages (HTTP GET)
-	app.Static(HomePage(WithTemplate("home")))
-	app.Static(NewPage("about"))
-	app.Static(NewPage("path-to-profit"))
-	app.Serve(NewPage("hello/:name"), func(c echo.Context) (any, error) {
-		// Construct a struct to say hello
-		return struct{ Name string }{
-			Name: c.PathParam("name"),
-		}, nil
+	// Create event
+	events.On("create:user", func(c *HandlerContext) error {
+		user := new(User)
+		if err := c.Bind(user); err != nil {
+			return err
+		}
+		// TODO: insert 'user' into the SQLite database
+		return nil
 	})
 
-	// Callbacks (HTTP POST)
-	app.On("hello-again", func(c *HandlerContext) error {
-		return c.Refresh()
+	// Update event
+	events.On("update:user", func(c *HandlerContext) error {
+		user := new(User)
+		if err := c.Bind(user); err != nil {
+			return err
+		}
+		// TODO: update 'user' in the SQLite database
+		return nil
 	})
-
-	app.On("hello-another", func(c *HandlerContext) error {
-		return c.Redirect("hello/" + c.FormValue("name"))
+	
+	// Delete event
+	events.On("delete:user", func(c *HandlerContext) error {
+		id := c.FormValue("id")
+		// TODO: delete user with 'id' from the SQLite database
+		return nil
 	})
-
-	// Events (SQLITE CRUD)
-	// app.Events(func(events *Events) {
-	// TODO: REST triggered events
-	// })
-
-	if err := app.Start(); err != nil {
-		log.Fatal(err)
-	}
-}
+})
