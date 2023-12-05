@@ -1,4 +1,13 @@
 
-{{ template "header" . }}
+{{ with .Props }}
 <div class="container mx-auto py-4">
-  <h2 class="text-3xl">Hello World</h2>
+  <h2 id="hello" class="text-3xl">
+      Hello World From {{.Path}}
+  </h2>
+
+  <form hx-swap="outerHTML" hx-post='{{ $.Page.Event "say-hello" }}' >
+    <input required name="name" class="input" placeholder="your name">
+    <button class="btn">Click Me</button>
+  </form>
+</div>
+{{ end }}

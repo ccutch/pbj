@@ -1,4 +1,4 @@
-" vim-bootstrap 2023-10-19 07:44:52
+" vim-bootstrap 2023-10-31 23:24:58
 
 "*****************************************************************************
 "" Vim-Plug core
@@ -10,9 +10,9 @@ else
   let curl_exists=expand('curl')
 endif
 
-let g:vim_bootstrap_langs = "go"
+let g:vim_bootstrap_langs = "go,python,typescript"
 let g:vim_bootstrap_editor = "nvim"				" nvim or vim
-let g:vim_bootstrap_theme = "molokai"
+let g:vim_bootstrap_theme = "pencil"
 let g:vim_bootstrap_frams = ""
 
 if !filereadable(vimplug_exists)
@@ -49,8 +49,7 @@ Plug 'dense-analysis/ale'
 Plug 'Yggdroot/indentLine'
 Plug 'editor-bootstrap/vim-bootstrap-updater'
 Plug 'tpope/vim-rhubarb' " required by fugitive to :GBrowse
-Plug 'tomasr/molokai'
-
+Plug 'Mizux/vim-colorschemes'
 
 if isdirectory('/usr/local/opt/fzf')
   Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
@@ -81,6 +80,17 @@ Plug 'honza/vim-snippets'
 Plug 'fatih/vim-go', {'do': ':GoInstallBinaries'}
 
 
+" python
+"" Python Bundle
+Plug 'davidhalter/jedi-vim'
+Plug 'raimon49/requirements.txt.vim', {'for': 'requirements'}
+
+
+" typescript
+Plug 'leafgarland/typescript-vim'
+Plug 'HerringtonDarkholme/yats.vim'
+
+
 "*****************************************************************************
 "*****************************************************************************
 
@@ -108,9 +118,9 @@ set fileencodings=utf-8
 set backspace=indent,eol,start
 
 "" Tabs. May be overridden by autocmd rules
-set tabstop=2
+set tabstop=4
 set softtabstop=0
-set shiftwidth=2
+set shiftwidth=4
 set expandtab
 
 "" Map leader to ,
@@ -147,8 +157,7 @@ set ruler
 set number
 
 let no_buffers_menu=1
-colorscheme molokai
-
+colorscheme pencil
 
 " Better command line completion 
 set wildmenu
@@ -359,6 +368,7 @@ endif
 
 cnoremap <C-P> <C-R>=expand("%:p:h") . "/" <CR>
 nnoremap <silent> <leader>b :Buffers<CR>
+nnoremap <silent> <leader>e :FZF -m<CR>
 nnoremap <silent> <C-p> :FZF -m<CR>
 "Recovery commands from history through FZF
 nmap <leader>y :History:<CR>
@@ -496,6 +506,41 @@ augroup END
 " ale
 :call extend(g:ale_linters, {
     \"go": ['golint', 'go vet'], })
+
+
+" python
+" vim-python
+augroup vimrc-python
+  autocmd!
+  autocmd FileType python setlocal expandtab shiftwidth=4 tabstop=8 colorcolumn=79
+      \ formatoptions+=croq softtabstop=4
+      \ cinwords=if,elif,else,for,while,try,except,finally,def,class,with
+augroup END
+
+" jedi-vim
+let g:jedi#popup_on_dot = 0
+let g:jedi#goto_assignments_command = "<leader>g"
+let g:jedi#goto_definitions_command = "<leader>d"
+let g:jedi#documentation_command = "K"
+let g:jedi#usages_command = "<leader>n"
+let g:jedi#rename_command = "<leader>r"
+let g:jedi#show_call_signatures = "0"
+let g:jedi#completions_command = "<C-Space>"
+let g:jedi#smart_auto_mappings = 0
+
+" ale
+:call extend(g:ale_linters, {
+    \'python': ['flake8'], })
+
+" vim-airline
+let g:airline#extensions#virtualenv#enabled = 1
+
+" Syntax highlight
+let python_highlight_all = 1
+
+
+" typescript
+let g:yats_host_keyword = 1
 
 
 

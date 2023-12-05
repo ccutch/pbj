@@ -12,80 +12,58 @@ import (
 	"github.com/pocketbase/pocketbase/tools/template"
 )
 
-// Static function for mounting static pages (SSG optimally)
-func (app *App) Static(p *Page) {
-	app.Serve(p, func(c echo.Context) (any, error) {
-		data := map[string]*models.Record{ }
-		data["User"], _ = c.Get(apis.ContextAuthRecordKey).(*models.Record)
-		return data, nil
-	})
-}
-
-// Serve function for mounting dynamit pages (SSR optimally)
-func (app *App) Serve(p *Page, h GetProps) {
-	p.app = app
-	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		e.Router.GET("/"+p.route, func(c echo.Context) error {
-			return p.Render(c, h)
-		}, apis.ActivityLogger(app))
-		return nil
-	})
-}
-
-// GetProps type for getting the props of a page when needed
-type GetProps func(echo.Context) (any, error)
-
-// Page data structure for passing configuration state to pages
-type Page struct {
-	app           *App
-	admin, public bool
-	route, tmpl   string
-}
-
-// NewPage creates a new page instance from given options
-func NewPage(route string, options ...func(*Page)) *Page {
-	var p Page
-	for _, o := range options {
-		o(&p)
+// NewPage entry point for page API
+func (app *App) NewPage(name string, opts ...func(*Page)) *Page {
+	p := Page{
+		app:    app,
+		route:  name,
+		tmpl:   name,
+		layout: hydrationTemplate,
 	}
-	p.route = route
+	for _, fn := range opts {
+		fn(&p)
+	}
 	return &p
 }
 
-// HomePage routes for root, ie. https://www.example.com
-func HomePage(options ...func(*Page)) *Page {
-	return NewPage("", append(
-		[]func(*Page){
-			WithTemplate("index"),
-			WithPublicAccess(true),
-		},
-		options...,
-	)...)
+// Homepage helper for homepages
+func (app *App) HomePage(opts ...func(*Page)) *Page {
+	return app.NewPage("",
+		WithTemplate("home"),
+		WithPublicAccess(true),
+	)
 }
 
-// WithTemplate configures Page to use a specific template file
-func WithTemplate(tmpl string) func(*Page) {
-	return func(p *Page) {
-		p.tmpl = tmpl
-	}
+// Page data structure for passing configuration state to pages
+type Page struct {
+	app                 *App
+	admin, public       bool
+	layout, route, tmpl string
 }
 
-// WithPublicAccess configures the Page to be public accessable
-func WithPublicAccess(public bool) func(*Page) {
-	return func(p *Page) {
-		p.public = public
-	}
+// Static serve page with only user and admin
+func (p *Page) Static(props any, err error) *Page {
+	return p.Serve(func(c Context) (any, error) {
+		return props, err
+	})
 }
 
-// WithAdminOnly configures the Page to only allow admin access
-func WithAdminOnly(admin bool) func(*Page) {
-	return func(p *Page) {
-		p.admin = admin
-	}
+// Serve with Props retrieved before rendering
+func (p *Page) Serve(h GetProps) *Page {
+	p.app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		e.Router.GET("/"+p.route, func(c echo.Context) error {
+			return p.render(&pageContext{c}, h)
+		}, apis.ActivityLogger(p.app))
+		return nil
+	})
+	return p
 }
+
+// GetProps type for getting the props of a page when needed
+type GetProps func(Context) (any, error)
 
 // Render function is core to functionallity and can be optimized
-func (p *Page) Render(c echo.Context, h GetProps) (err error) {
+func (p *Page) render(c Context, h GetProps) (err error) {
 	reg := template.NewRegistry()
 	isHtmx := c.Request().Header.Get("Hx-Request") == "true"
 
@@ -100,15 +78,19 @@ func (p *Page) Render(c echo.Context, h GetProps) (err error) {
 	if (!p.admin && user != nil) || (p.admin && admin != nil) || (p.public && isHtmx) {
 		parts, _ := filepath.Glob("templates/partials/*.html")
 		parts = append([]string{"templates/pages/" + p.tmpl + ".html"}, parts...)
-		page := reg.LoadFiles(parts...)
-		var data any
+		var data struct {
+			*Page
+			Props any
+		}
+		data.Page = p
 		if h != nil {
-			data, err = h(c)
+			data.Props, err = h(c)
 			if err != nil {
 				return errors.Wrap(err, "failed fetch data")
 			}
 		}
-		html, err := page.Render(data)
+		view := reg.LoadFiles(parts...)
+		html, err := view.Render(data)
 		if err != nil {
 			return errors.Wrap(err, "failed to render")
 		}
@@ -123,8 +105,8 @@ func (p *Page) Render(c echo.Context, h GetProps) (err error) {
 		} else {
 			parts = append([]string{"templates/pages/login.html"}, parts...)
 		}
-		page := reg.LoadFiles(parts...)
-		html, err := page.Render(nil)
+		view := reg.LoadFiles(parts...)
+		html, err := view.Render(nil)
 		if err != nil {
 			return errors.Wrap(err, "failed to render")
 		}
@@ -132,12 +114,16 @@ func (p *Page) Render(c echo.Context, h GetProps) (err error) {
 	}
 
 	// If no auth and no htmx then we render page runner
-	page := reg.LoadString(hydrationTemplate)
-	html, err := page.Render(struct {
+	view := reg.LoadString(p.layout)
+	html, err := view.Render(struct {
 		Page          string
 		Params        string
 		HeaderContent string
-	}{c.Request().URL.Path, c.Request().URL.RawQuery, p.app.headerContent})
+	}{
+		c.Request().URL.Path,
+		c.Request().URL.RawQuery,
+		p.app.headerContent,
+	})
 	if err != nil {
 		return errors.Wrap(err, "failed to render")
 	}
@@ -146,8 +132,7 @@ func (p *Page) Render(c echo.Context, h GetProps) (err error) {
 }
 
 // Everything we need for hydration including some sensible defaults
-var hydrationTemplate = `
-<!DOCTYPE html>
+var hydrationTemplate = `<!DOCTYPE html>
 <html lang="en">
   <head>
     <title>{{block "title" .}}{{end}}</title>
@@ -155,25 +140,15 @@ var hydrationTemplate = `
     <meta charSet="utf-8">
     {{.HeaderContent|raw}}
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-    <script type="module">
-      import PocketBase from '/scripts/pocketbase.es.js';
-      const pb = new PocketBase(window.location.href);
-      window.logout = () => {
-        pb.authStore.clear();
-        window.location.reload();
-      };
-      document.body.addEventListener("htmx:configRequest", (event) => {
-        event.detail.headers['Authorization'] = "Bearer "+pb.authStore.token;
-      });
-    </script>
-    <style>*{box-sizing:border-box}</style>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pocketbase/0.19.0/pocketbase.umd.js"></script>
   </head>
   <body>
-    <main
-	  hx-get="{{.Page}}?{{.Params}}"
-      hx-trigger="load"
-      hx-swap="outerHTML"
-    ></main>
+    <script>
+	  const pb = new PocketBase(window.location.href);
+      document.body.addEventListener("htmx:configRequest", function (event) {
+	    if (pb && pb.authStore) event.detail.headers['Authorization'] = "Bearer "+pb.authStore.token;
+      });
+    </script>
+    <main hx-get="{{.Page}}{{with .Params}}?{{.}}{{end}}" hx-trigger="load" hx-swap="outerHTML"></main>
   </body>
-</html>
-`
+</html>`

@@ -1,7 +1,6 @@
 package pbj
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -13,7 +12,11 @@ import (
 
 // NewApp creates a new app encapsolating PocketBase
 func NewApp(opts ...func(*App)) *App {
-	app := App{pocketbase.New(), ""}
+	app := App{
+		PocketBase:    pocketbase.New(),
+		headerContent: "",
+		publicFiles:   "public",
+	}
 	for _, o := range opts {
 		o(&app)
 	}
@@ -24,6 +27,7 @@ func NewApp(opts ...func(*App)) *App {
 type App struct {
 	*pocketbase.PocketBase
 	headerContent string
+	publicFiles   string
 }
 
 // Start starts pocketbase app after registering migrations
@@ -31,7 +35,8 @@ func (app *App) Start() error {
 
 	// Serve static files from PocketBase docs by default
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS("public"), false))
+		pubDir := os.DirFS(app.publicFiles)
+		e.Router.GET("/*", apis.StaticDirectoryHandler(pubDir, false))
 		return nil
 	})
 
@@ -42,40 +47,4 @@ func (app *App) Start() error {
 
 	// Defer to PocketBase after this point
 	return app.PocketBase.Start()
-}
-
-func WithMeta(name, content string) func(*App) {
-	return func(app *App) {
-		app.headerContent = fmt.Sprintf(
-			`%s<meta name="%s" content="%s">`,
-			app.headerContent, name, content,
-		)
-	}
-}
-
-func WithStylesheet(href string) func(*App) {
-	return func(app *App) {
-		app.headerContent = fmt.Sprintf(
-			`%s<link rel="stylesheet" href="%s" />`,
-			app.headerContent, href,
-		)
-	}
-}
-
-func WithScript(src string) func(*App) {
-	return func(app *App) {
-		app.headerContent = fmt.Sprintf(
-			`%s<script src="%s"></script>`,
-			app.headerContent, src,
-		)
-	}
-}
-
-func WithInlineScript(content string) func(*App) {
-	return func(app *App) {
-		app.headerContent = fmt.Sprintf(
-			`%s<script>%s</script>`,
-			app.headerContent, content,
-		)
-	}
 }
