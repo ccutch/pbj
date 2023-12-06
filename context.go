@@ -1,6 +1,7 @@
 package pbj
 
 import (
+	"log"
 	"net/http"
 	"path/filepath"
 
@@ -82,6 +83,8 @@ func (ctx *pageContext) Render(name string) error {
 	p := ctx.page
 	reg := template.NewRegistry()
 	isHtmx := ctx.Request().Header.Get("Hx-Request") == "true"
+
+	log.Println("is htmx", isHtmx)
 
 	// Simplify the api - file based routing?
 	if name == "" {
