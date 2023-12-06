@@ -34,7 +34,7 @@ func (p *Page) Static() *Page {
 func (p *Page) Serve(h GetProps) *Page {
 	p.app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		e.Router.GET("/"+p.route, func(c echo.Context) error {
-			return h(&pageContext{c, p, map[string]any{}})
+			return h(&pageContext{c, p, h, map[string]any{}})
 		}, apis.ActivityLogger(p.app))
 		return nil
 	})
