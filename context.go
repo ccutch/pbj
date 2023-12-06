@@ -2,6 +2,7 @@ package pbj
 
 import (
 	"net/http"
+	"net/url"
 	"path/filepath"
 
 	"github.com/labstack/echo/v5"
@@ -15,6 +16,7 @@ type Context interface {
 	Request() *http.Request
 	Response() *echo.Response
 	FormValue(string) string
+	FormValues() (url.Values, error)
 	PathParam(string) string
 	QueryParam(string) string
 
