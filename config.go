@@ -45,20 +45,6 @@ func WithInlineScript(content string) func(*App) {
 	}
 }
 
-// WithTemplate configures Page to use a specific template file
-func WithTemplate(tmpl string) func(*Page) {
-	return func(p *Page) {
-		p.tmpl = tmpl
-	}
-}
-
-// WithLayout configures Page to use a specific hydration layout
-func WithLayout(layout string) func(*Page) {
-	return func(p *Page) {
-		p.layout = layout
-	}
-}
-
 // WithPublicAccess configures the Page to be public accessable
 func WithPublicAccess(public bool) func(*Page) {
 	return func(p *Page) {

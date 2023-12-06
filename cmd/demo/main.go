@@ -8,16 +8,16 @@ import (
 
 func main() {
 	app := pbj.NewApp()
-	page := app.HomePage()
+	page := app.NewPage("", pbj.WithPublicAccess(true))
 
-	page.Serve(func(c pbj.Context) error {
-		c.Set("url", c.Request().URL)
-		return nil
+	page.Serve(func(ctx pbj.Context) error {
+		ctx.Set("url", ctx.Request().URL)
+		return ctx.Render("pages/home")
 	})
 
-	page.On("say-hello", func(c pbj.Context) error {
-		c.Set("name", c.FormValue("name"))
-		return c.Partial("say-hello")
+	page.On("say-hello", func(ctx pbj.Context) error {
+		ctx.Set("name", ctx.FormValue("name"))
+		return ctx.Render("partials/say-hello")
 	})
 
 	if err := app.Start(); err != nil {
