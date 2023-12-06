@@ -55,6 +55,9 @@ func (p *Page) serve(c *pageContext, fn GetProps) error {
 		c.Set("page", p)
 		c.Set("user", user)
 		c.Set("admin", admin)
+		if fn == nil {
+			return c.Render(p.route)
+		}
 		return fn(c)
 	}
 
