@@ -36,9 +36,8 @@ var (
 // Page Context
 type pageContext struct {
 	echo.Context
-	page     *Page
-	getProps GetProps
-	props    map[string]any
+	page  *Page
+	props map[string]any
 }
 
 func (ctx *pageContext) Admin() *models.Admin {
@@ -86,9 +85,6 @@ func (ctx *pageContext) Render(name string) error {
 	}
 	parts, _ := filepath.Glob("templates/partials/*.html")
 	parts = append([]string{"templates/" + name + ".html"}, parts...)
-	if err := ctx.getProps(ctx); err != nil {
-		return errors.Wrap(err, "failed to get props")
-	}
 	html, err := reg.LoadFiles(parts...).Render(ctx.Props())
 	if err != nil {
 		return errors.Wrap(err, "failed to render")
@@ -145,14 +141,11 @@ func (ctx *eventContext) Render(name string) error {
 	reg := template.NewRegistry()
 	parts, _ := filepath.Glob("templates/partials/*.html")
 	parts = append([]string{"templates/" + name + ".html"}, parts...)
-	user, _ := ctx.Get(apis.ContextAuthRecordKey).(*models.Record)
-	admin, _ := ctx.Get(apis.ContextAdminKey).(*models.Admin)
 	ctx.Set("app", ctx.app)
 	ctx.Set("page", ctx.page)
-	ctx.Set("user", user)
-	ctx.Set("admin", admin)
-	page := reg.LoadFiles(parts...)
-	html, err := page.Render(ctx.Props())
+	ctx.Set("user", ctx.User())
+	ctx.Set("admin", ctx.Admin())
+	html, err := reg.LoadFiles(parts...).Render(ctx.Props())
 	if err != nil {
 		return err
 	}

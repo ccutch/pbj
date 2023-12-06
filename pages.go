@@ -35,17 +35,17 @@ func (p *Page) Static() *Page {
 }
 
 // Serve with Props retrieved before rendering
-func (p *Page) Serve(h GetProps) *Page {
+func (p *Page) Serve(fn GetProps) *Page {
 	p.app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		e.Router.GET("/"+p.route, func(c echo.Context) error {
-			return p.serve(&pageContext{c, p, h, map[string]any{}})
+			return p.serve(&pageContext{c, p, map[string]any{}}, fn)
 		}, apis.ActivityLogger(p.app))
 		return nil
 	})
 	return p
 }
 
-func (p *Page) serve(c *pageContext) error {
+func (p *Page) serve(c *pageContext, fn GetProps) error {
 	isHtmx := c.Request().Header.Get("Hx-Request") == "true"
 	user, admin := c.User(), c.Admin()
 
@@ -55,7 +55,7 @@ func (p *Page) serve(c *pageContext) error {
 		c.Set("page", p)
 		c.Set("user", user)
 		c.Set("admin", admin)
-		return c.getProps(c)
+		return fn(c)
 	}
 
 	// If htmx request w/o auth render login page w/o data
