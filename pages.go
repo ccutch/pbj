@@ -1,9 +1,13 @@
 package pbj
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v5"
+	"github.com/pkg/errors"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/tools/template"
 )
 
 // NewPage entry point for page API
@@ -34,11 +38,51 @@ func (p *Page) Static() *Page {
 func (p *Page) Serve(h GetProps) *Page {
 	p.app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		e.Router.GET("/"+p.route, func(c echo.Context) error {
-			return h(&pageContext{c, p, h, map[string]any{}})
+			return p.serve(&pageContext{c, p, h, map[string]any{}})
 		}, apis.ActivityLogger(p.app))
 		return nil
 	})
 	return p
+}
+
+func (p *Page) serve(c *pageContext) error {
+	isHtmx := c.Request().Header.Get("Hx-Request") == "true"
+	user, admin := c.User(), c.Admin()
+
+	// If auth is present render the requested page w/ data
+	if (!p.admin && user != nil) || (p.admin && admin != nil) || (p.public && isHtmx) {
+		c.Set("app", p.app)
+		c.Set("page", p)
+		c.Set("user", user)
+		c.Set("admin", admin)
+		return c.getProps(c)
+	}
+
+	// If htmx request w/o auth render login page w/o data
+	if isHtmx {
+		if p.admin {
+			return c.Render("pages/admin-login.html")
+		} else {
+			return c.Render("pages/login.html")
+		}
+	}
+
+	// If no auth and no htmx then we render page runner
+	reg := template.NewRegistry()
+	html, err := reg.LoadString(hydrationTemplate).Render(struct {
+		Page          string
+		Params        string
+		HeaderContent string
+	}{
+		c.Request().URL.Path,
+		c.Request().URL.RawQuery,
+		p.app.headerContent,
+	})
+	if err != nil {
+		return errors.Wrap(err, "failed to render")
+	}
+
+	return c.HTML(http.StatusOK, html)
 }
 
 // GetProps type for getting the props of a page when needed

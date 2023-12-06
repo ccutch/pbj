@@ -1,7 +1,6 @@
 package pbj
 
 import (
-	"log"
 	"net/http"
 	"path/filepath"
 
@@ -80,67 +79,20 @@ func (ctx *pageContext) Replace(url string) error {
 }
 
 func (ctx *pageContext) Render(name string) error {
-	p := ctx.page
 	reg := template.NewRegistry()
-	isHtmx := ctx.Request().Header.Get("Hx-Request") == "true"
-
-	log.Println("is htmx", isHtmx)
-
 	// Simplify the api - file based routing?
 	if name == "" {
-		name = p.route
+		name = ctx.page.route
 	}
-
-	// If auth is present render the requested page w/ data
-	user, _ := ctx.Get(apis.ContextAuthRecordKey).(*models.Record)
-	admin, _ := ctx.Get(apis.ContextAdminKey).(*models.Admin)
-	if (!p.admin && user != nil) || (p.admin && admin != nil) || (p.public && isHtmx) {
-		ctx.Set("app", p.app)
-		ctx.Set("page", p)
-		ctx.Set("user", user)
-		ctx.Set("admin", admin)
-		parts, _ := filepath.Glob("templates/partials/*.html")
-		parts = append([]string{"templates/" + name + ".html"}, parts...)
-		if err := ctx.getProps(ctx); err != nil {
-			return errors.Wrap(err, "failed to get props")
-		}
-		html, err := reg.LoadFiles(parts...).Render(ctx.Props())
-		if err != nil {
-			return errors.Wrap(err, "failed to render")
-		}
-		return ctx.HTML(http.StatusOK, html)
+	parts, _ := filepath.Glob("templates/partials/*.html")
+	parts = append([]string{"templates/" + name + ".html"}, parts...)
+	if err := ctx.getProps(ctx); err != nil {
+		return errors.Wrap(err, "failed to get props")
 	}
-
-	// If htmx request w/o auth render login page w/o data
-	if isHtmx {
-		parts, _ := filepath.Glob("templates/partials/*.html")
-		if p.admin {
-			parts = append([]string{"templates/pages/admin-login.html"}, parts...)
-		} else {
-			parts = append([]string{"templates/pages/login.html"}, parts...)
-		}
-		view := reg.LoadFiles(parts...)
-		html, err := view.Render(nil)
-		if err != nil {
-			return errors.Wrap(err, "failed to render")
-		}
-		return ctx.HTML(http.StatusOK, html)
-	}
-
-	// If no auth and no htmx then we render page runner
-	html, err := reg.LoadString(hydrationTemplate).Render(struct {
-		Page          string
-		Params        string
-		HeaderContent string
-	}{
-		ctx.Request().URL.Path,
-		ctx.Request().URL.RawQuery,
-		p.app.headerContent,
-	})
+	html, err := reg.LoadFiles(parts...).Render(ctx.Props())
 	if err != nil {
 		return errors.Wrap(err, "failed to render")
 	}
-
 	return ctx.HTML(http.StatusOK, html)
 }
 
