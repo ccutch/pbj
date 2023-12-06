@@ -2,7 +2,6 @@ package pbj
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase/apis"
@@ -14,7 +13,7 @@ func (a *App) On(n string, h func(Context) error) {
 	a.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		route := a.Event(n)
 		e.Router.POST(route, func(c echo.Context) error {
-			return h(&eventContext{c})
+			return h(&eventContext{c, a, nil, map[string]any{}})
 		}, apis.ActivityLogger(a))
 		return nil
 	})
@@ -29,9 +28,8 @@ func (a *App) Event(n string) string {
 func (p *Page) On(n string, h func(Context) error) {
 	p.app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		route := p.Event(n)
-		log.Println("route = ", route)
 		e.Router.POST(route, func(c echo.Context) error {
-			return h(&eventContext{c})
+			return h(&eventContext{c, p.app, p, map[string]any{}})
 		}, apis.ActivityLogger(p.app))
 		return nil
 	})

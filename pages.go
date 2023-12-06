@@ -42,17 +42,15 @@ type Page struct {
 }
 
 // Static serve page with only user and admin
-func (p *Page) Static(props any, err error) *Page {
-	return p.Serve(func(c Context) (any, error) {
-		return props, err
-	})
+func (p *Page) Static() *Page {
+	return p.Serve(nil)
 }
 
 // Serve with Props retrieved before rendering
 func (p *Page) Serve(h GetProps) *Page {
 	p.app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		e.Router.GET("/"+p.route, func(c echo.Context) error {
-			return p.render(&pageContext{c}, h)
+			return p.render(&pageContext{c, p, map[string]any{}}, h)
 		}, apis.ActivityLogger(p.app))
 		return nil
 	})
@@ -60,7 +58,7 @@ func (p *Page) Serve(h GetProps) *Page {
 }
 
 // GetProps type for getting the props of a page when needed
-type GetProps func(Context) (any, error)
+type GetProps func(Context) error
 
 // Render function is core to functionallity and can be optimized
 func (p *Page) render(c Context, h GetProps) (err error) {
@@ -78,19 +76,17 @@ func (p *Page) render(c Context, h GetProps) (err error) {
 	if (!p.admin && user != nil) || (p.admin && admin != nil) || (p.public && isHtmx) {
 		parts, _ := filepath.Glob("templates/partials/*.html")
 		parts = append([]string{"templates/pages/" + p.tmpl + ".html"}, parts...)
-		var data struct {
-			*Page
-			Props any
-		}
-		data.Page = p
+		c.Set("app", p.app)
+		c.Set("page", p)
+		c.Set("user", user)
+		c.Set("admin", admin)
 		if h != nil {
-			data.Props, err = h(c)
-			if err != nil {
+			if err = h(c); err != nil {
 				return errors.Wrap(err, "failed fetch data")
 			}
 		}
 		view := reg.LoadFiles(parts...)
-		html, err := view.Render(data)
+		html, err := view.Render(c.Props())
 		if err != nil {
 			return errors.Wrap(err, "failed to render")
 		}

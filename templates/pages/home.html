@@ -1,13 +1,11 @@
 
-{{ with .Props }}
 <div class="container mx-auto py-4">
   <h2 id="hello" class="text-3xl">
-      Hello World From {{.Path}}
+      Hello World From {{.url.Path}}
   </h2>
 
-  <form hx-swap="outerHTML" hx-post='{{ $.Page.Event "say-hello" }}' >
+  <form hx-swap="outerHTML" hx-post='{{.page.Event "say-hello"}}'>
     <input required name="name" class="input" placeholder="your name">
     <button class="btn">Click Me</button>
   </form>
 </div>
-{{ end }}

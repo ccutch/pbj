@@ -1,20 +1,23 @@
 package pbj
 
 import (
-	"errors"
 	"net/http"
 	"path/filepath"
 
 	"github.com/labstack/echo/v5"
+	"github.com/pocketbase/pocketbase/apis"
+	"github.com/pocketbase/pocketbase/models"
 	"github.com/pocketbase/pocketbase/tools/template"
 )
 
 type Context interface {
 	echo.Context
+	Set(string, any)
+	Props() map[string]any
 	Refresh() error
 	Push(url string) error
 	Replace(url string) error
-	Partial(string, any) error
+	Render() error
 }
 
 var (
@@ -25,6 +28,16 @@ var (
 // Page Context
 type pageContext struct {
 	echo.Context
+	page  *Page
+	props map[string]any
+}
+
+func (ctx *pageContext) Props() map[string]any {
+	return ctx.props
+}
+
+func (ctx *pageContext) Set(k string, v any) {
+	ctx.props[k] = v
 }
 
 func (ctx *pageContext) Unwrap() echo.Context {
@@ -46,13 +59,25 @@ func (ctx *pageContext) Replace(url string) error {
 	return nil
 }
 
-func (*pageContext) Partial(string, any) error {
-	return errors.New("There is no partial rendering for pages")
+func (*pageContext) Render() error {
+	return nil // render is default behavior
 }
 
 // Event Context
 type eventContext struct {
 	echo.Context
+	name  string
+	app   *App
+	page  *Page
+	props map[string]any
+}
+
+func (ctx *eventContext) Props() map[string]any {
+	return ctx.props
+}
+
+func (ctx *eventContext) Set(k string, v any) {
+	ctx.props[k] = v
 }
 
 func (ctx *eventContext) Unwrap() echo.Context {
@@ -74,12 +99,20 @@ func (ctx *eventContext) Replace(url string) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-func (ctx *eventContext) Partial(name string, data any) error {
+func (ctx *eventContext) Render() error {
 	reg := template.NewRegistry()
 	parts, _ := filepath.Glob("templates/partials/*.html")
-	parts = append([]string{"templates/partials/" + name + ".html"}, parts...)
+	parts = append([]string{
+		"templates/partials/" + name + ".html",
+	}, parts...)
+	user, _ := ctx.Get(apis.ContextAuthRecordKey).(*models.Record)
+	admin, _ := ctx.Get(apis.ContextAdminKey).(*models.Admin)
+	ctx.Set("app", ctx.app)
+	ctx.Set("page", ctx.page)
+	ctx.Set("user", user)
+	ctx.Set("admin", admin)
 	page := reg.LoadFiles(parts...)
-	html, err := page.Render(data)
+	html, err := page.Render(ctx.Props())
 	if err != nil {
 		return err
 	}
