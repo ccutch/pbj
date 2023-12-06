@@ -15,6 +15,7 @@ type Context interface {
 	Request() *http.Request
 	Response() *echo.Response
 	FormValue(string) string
+	PathParam(string) string
 	QueryParam(string) string
 
 	Admin() *models.Admin
