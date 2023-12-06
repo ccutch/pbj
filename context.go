@@ -141,10 +141,6 @@ func (ctx *eventContext) Render(name string) error {
 	reg := template.NewRegistry()
 	parts, _ := filepath.Glob("templates/partials/*.html")
 	parts = append([]string{"templates/" + name + ".html"}, parts...)
-	ctx.Set("app", ctx.app)
-	ctx.Set("page", ctx.page)
-	ctx.Set("user", ctx.User())
-	ctx.Set("admin", ctx.Admin())
 	html, err := reg.LoadFiles(parts...).Render(ctx.Props())
 	if err != nil {
 		return err
