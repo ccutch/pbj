@@ -64,9 +64,9 @@ func (p *Page) serve(c *pageContext, fn GetProps) error {
 	// If htmx request w/o auth render login page w/o data
 	if isHtmx {
 		if p.admin {
-			return c.Render("pages/admin-login.html")
+			return c.Render("pages/admin-login")
 		} else {
-			return c.Render("pages/login.html")
+			return c.Render("pages/login")
 		}
 	}
 
