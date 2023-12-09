@@ -30,8 +30,10 @@ type Page struct {
 }
 
 // Static serve page with only user and admin
-func (p *Page) Static() *Page {
-	return p.Serve(nil)
+func (p *Page) Static(tmpl string) *Page {
+	return p.Serve(func (c Context) {
+		return c. Render(tmpl)
+	})
 }
 
 // Serve with Props retrieved before rendering
