@@ -1,4 +1,4 @@
-module github.com/ccutch/pb-j-stack
+module github.com/ccutch/pbj
 
 go 1.21.2
 
