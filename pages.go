@@ -31,7 +31,7 @@ type Page struct {
 
 // Static serve page with only user and admin
 func (p *Page) Static(tmpl string) *Page {
-	return p.Serve(func (c Context) {
+	return p.Serve(func (c Context) error {
 		return c. Render(tmpl)
 	})
 }
