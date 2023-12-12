@@ -1,6 +1,7 @@
 package pbj
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -52,6 +53,10 @@ func (ctx *pageContext) User() *models.Record {
 	return user
 }
 
+func (ctx *pageContext) Event(n string) string {
+	return fmt.Sprintf("%s/@%s", ctx.Request().URL.Path, n)
+}
+
 func (ctx *pageContext) Props() map[string]any {
 	return ctx.props
 }
@@ -87,7 +92,9 @@ func (ctx *pageContext) Render(name string) error {
 	}
 	parts, _ := filepath.Glob("templates/partials/*.html")
 	parts = append([]string{"templates/" + name + ".html"}, parts...)
-	html, err := reg.LoadFiles(parts...).Render(ctx.Props())
+	html, err := reg.AddFuncs(map[string]any{
+		"event": ctx.Event,
+	}).LoadFiles(parts...).Render(ctx.Props())
 	if err != nil {
 		return errors.Wrap(err, "failed to render")
 	}
@@ -110,6 +117,10 @@ func (ctx *eventContext) Admin() *models.Admin {
 func (ctx *eventContext) User() *models.Record {
 	user, _ := ctx.Get(apis.ContextAuthRecordKey).(*models.Record)
 	return user
+}
+
+func (ctx *eventContext) Event(n string) string {
+	return fmt.Sprintf("%s/@%s", ctx.Request().URL.Path, n)
 }
 
 func (ctx *eventContext) Props() map[string]any {
@@ -143,7 +154,9 @@ func (ctx *eventContext) Render(name string) error {
 	reg := template.NewRegistry()
 	parts, _ := filepath.Glob("templates/partials/*.html")
 	parts = append([]string{"templates/" + name + ".html"}, parts...)
-	html, err := reg.LoadFiles(parts...).Render(ctx.Props())
+	html, err := reg.AddFuncs(map[string]any{
+		"event": ctx.Event,
+	}).LoadFiles(parts...).Render(ctx.Props())
 	if err != nil {
 		return err
 	}
