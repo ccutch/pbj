@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"strings"
 
 	"github.com/labstack/echo/v5"
 	"github.com/pkg/errors"
@@ -120,7 +121,9 @@ func (ctx *eventContext) User() *models.Record {
 }
 
 func (ctx *eventContext) Event(n string) string {
-	return fmt.Sprintf("%s/@%s", ctx.Request().URL.Path, n)
+	path := ctx.Request().URL.Path
+	parts := strings.Split(path, "/@")
+	return fmt.Sprintf("%s/@%s", parts[0], n)
 }
 
 func (ctx *eventContext) Props() map[string]any {
