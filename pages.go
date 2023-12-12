@@ -30,8 +30,10 @@ type Page struct {
 }
 
 // Static serve page with only user and admin
-func (p *Page) Static() *Page {
-	return p.Serve(nil)
+func (p *Page) Static(tmpl string) *Page {
+	return p.Serve(func (c Context) error {
+		return c. Render(tmpl)
+	})
 }
 
 // Serve with Props retrieved before rendering
@@ -64,9 +66,9 @@ func (p *Page) serve(c *pageContext, fn GetProps) error {
 	// If htmx request w/o auth render login page w/o data
 	if isHtmx {
 		if p.admin {
-			return c.Render("pages/admin-login.html")
+			return c.Render("pages/admin-login")
 		} else {
-			return c.Render("pages/login.html")
+			return c.Render("pages/login")
 		}
 	}
 
